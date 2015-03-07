@@ -2,7 +2,4 @@
 
 set -e
 
-mkdir -p /root/.config
-[ ! -L /root/.config/NzbDrone ] && ln -s /data /root/.config/NzbDrone
-
-mono /opt/NzbDrone/NzbDrone.exe
+exec su -c "mono /opt/NzbDrone/NzbDrone.exe --no-browser -data=/sonarr" - $MEDIA_USER
