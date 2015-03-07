@@ -2,6 +2,11 @@
 
 set -e
 
-git -C /couchpotato pull
+# On restart bring CP up to master
+su -c "cd /couchpotato && git pull" - $MEDIA_USER
 
-python2.7 /couchpotato/CouchPotato.py --console_log --data_dir=/data --config_file=/data/couchpotato.ini
+sed -i "s|MEDIA_USER|${MEDIA_USER}|g" /etc/supervisor/conf.d/couchpotato.conf 
+
+echo "Starting supervisord"
+# Run CP under supervisor just to avoid restarting the container on CP update
+exec /usr/bin/supervisord --configuration /etc/supervisor/conf.d/couchpotato.conf
