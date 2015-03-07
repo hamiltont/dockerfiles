@@ -2,41 +2,35 @@
 
 This is a Dockerfile to set up (https://plex.tv/ "Plex Media Server") - (https://plex.tv/)
 
-Build from docker file
-
-```
-git clone git@github.com:timhaak/docker-plex.git
-cd docker-plex
-docker build -t plex .
-```
-
-You can also obtain it via:
-
-```
-docker pull timhaak/plex
-```
-
 ---
-Instructions to run:
 
-```
-docker run -d -h *your_host_name* -v /*your_config_location*:/config -v /*your_videos_location*:/data -p 32400:32400  plex
-```
-or for auto detection add --net="host". Though be aware this more insecure but should be fine on your personal servers.
+Everything below assumes you are *not* using --net=host and wish to instead use the 
+default of --net=bridge. 
 
-```
-docker run -d --net="host" -h *your_host_name* -v /*your_config_location*:/config -v /*your_videos_location*:/data -p 32400:32400  plex
-```
+The first time it runs, it will initialize the config directory. To enable remote 
+connections (e.g. the ability to log into your server from plex.tv), you need to 
+first enable non-authenticated access to the server from your home network. 
+To do this, set the `PLEX_HOSTNET` environment variable to be your local network
+and netmask, such as `192.168.0.0/255.255.255.0`. On the first startup, this 
+will create the correct Plex preferences.xml file to allow nonauthenticated 
+connections from this network. 
 
-The first time it runs, it will initialize the config directory and terminate.
+You then need to use `http://<docker-host>:<NAT of 32400>/web` to log into plex.tv
+from the server's settings tab. You may need to log in twice - once to the web 
+interface and then once more at the `Settings->Server->Connect` location. It's 
+unlikely plex.tv will be able to connect to your server automatically, so you
+likely need to enable port-forwarding from your router to `<NAT of 32400>` and 
+manually set the external port. 
 
-You will need to modify the auto-generated config file to allow connections from your local IP range. This can be done by modifying the file:
+Once plex.tv has connected to your server successfully, you can then disable 
+local network authentication if you so choose. You should bind-mount the 
+configuration direction (/plex by default) so that later docker containers 
+send the same identification information to plex.tv and it can achieve 
+connection by trying all the ports that worked for that server identifier in
+the past. 
 
-*your_config_location*/Library/Application Support/Plex Media Server/Preferences.xml
-
-and adding ```allowedNetworks="192.168.1.0/255.255.255.0" ``` as a parameter in the <Preferences ...> section. (Or what ever your local range is)
-
-Start the docker instance again and it will stay as a daemon and listen on port 32400.
-
-Browse to: ```http://*ipaddress*:32400/web``` to run through the setup wizard.
-
+Note: If you choose to setup a reverse proxy, ensure that you utilize docker's
+links to send traffic to `http://<plex-link-alias>:<NAT of 32400>` and *avoid* 
+sending traffic to `http://<docker-host>:<NAT of 32400>`, as the latter would
+appear to plex to be traffic from inside the `PLEX_HOSTNET` and would therefore
+be allowed to view/access media without any authentication. 
