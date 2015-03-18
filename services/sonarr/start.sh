@@ -2,4 +2,7 @@
 
 set -e
 
-exec su -c "mono /opt/NzbDrone/NzbDrone.exe --no-browser -data=/sonarr" - $MEDIA_USER
+sed -i "s|MEDIA_USER|${MEDIA_USER}|g" /etc/supervisor/conf.d/sonarr.conf 
+
+echo "Starting supervisord"
+exec /usr/bin/supervisord --configuration /etc/supervisor/conf.d/sonarr.conf
