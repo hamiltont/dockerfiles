@@ -22,7 +22,7 @@ ENV PLEX_MEDIA_SERVER_HOME /usr/lib/plexmediaserver
 # Where to store logs,database,settings,plugins,etc
 ENV PLEX_MEDIA_SERVER_APPLICATION_SUPPORT_DIR /plex
 # How many plugins processes can run at the same time
-ENV PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS 3
+ENV PLEX_MEDIA_SERVER_MAX_PLUGIN_PROCS 9
 # Where to store transcodes
 ENV PLEX_MEDIA_SERVER_TMPDIR /tmp
 ENV TMPDIR $PLEX_MEDIA_SERVER_TMPDIR
@@ -34,7 +34,7 @@ ENV PLEX_MEDIA_SERVER_MAX_STACK_SIZE 10000
 ENV PLEX_MEDIA_SERVER_MAX_OPEN_FILES 4096
 
 # Custom version variable
-ENV PLEX_VER 0.9.11.13.874-dd72b17
+ENV PLEX_VER 0.9.11.14.947-b382187
 # Custom var for presetting allowed networks
 ENV PLEX_HOSTNET 10.0.0.24/255.255.255.0
 
@@ -48,7 +48,7 @@ RUN apt-get update && \
  mkdir -p /var/run/dbus && \
  mkdir -p /var/log/supervisor
 
-COPY supervisord.conf /etc/supervisor/conf.d/plex.conf
+ADD supervisord.conf /etc/supervisor/conf.d/plex.conf
 
 ADD ./start.sh /start.sh
 RUN chmod a+x /start.sh && \

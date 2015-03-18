@@ -2,6 +2,9 @@
 
 This is a Dockerfile to set up (https://plex.tv/ "Plex Media Server") - (https://plex.tv/)
 
+Ensure that you manually run "Optimize Database" inside of Plex after you first
+turn this container on and add all your media. 
+
 ---
 
 Everything below assumes you are *not* using --net=host and wish to instead use the 
