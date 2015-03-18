@@ -1,7 +1,4 @@
 #! /bin/sh
-
 set -e
 
-[ ! -L /data/transcode ] && ln -s /var/subsonic.default/transcode /data/transcode
-
-/usr/share/subsonic/subsonic.sh
+exec su -c "/usr/share/subsonic/subsonic.sh --home=/subsonic --max-memory=300" - $MEDIA_USER
