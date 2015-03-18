@@ -1,0 +1,106 @@
+nginx:
+   image: nginx:1.7.9
+   ports:
+     - 80:80
+     - 443:443
+   volumes:
+     - /lxc/nginx/enabled:/etc/nginx/enabled
+     - /lxc/nginx/available:/etc/nginx/available
+     - /lxc/nginx/logs:/var/log/nginx
+     - /lxc/shared/certs:/certs
+     - /lxc/nginx/nginx.conf:/etc/nginx/nginx.conf
+     - /etc/localtime:/etc/localtime:ro
+   links:
+     - znc
+     - plex
+     - nzbget
+     - sonarr
+     - couchpotato
+     - subsonic
+
+subsonic:
+  image: hamiltont/subsonic
+  ports:
+     # - 6500:6500
+     # IRC cannot be reverse-proxied using nginx
+     # You must expose a port on the host and port forward your router
+     - 4040:4040
+  volumes:
+    - /lxc/subsonic:/subsonic
+    - /media/seagate4:/media/seagate4
+    - /media/seagate5:/media/seagate5
+    - /etc/localtime:/etc/localtime:ro
+
+znc:
+  image: hamiltont/znc
+  ports:
+     # - 6500:6500
+     # IRC cannot be reverse-proxied using nginx
+     # You must expose a port on the host and port forward your router
+     - 6667:6667
+  volumes:
+    - /lxc/znc:/zncdata
+    - /etc/localtime:/etc/localtime:ro
+
+sonarr:
+  image: hamiltont/sonarr
+  ports:
+    - 8989:8989
+  volumes:
+    - /lxc/sonarr:/sonarr
+    - /media/seagate4:/media/seagate4
+    - /media/seagate5:/media/seagate5
+    - /etc/localtime:/etc/localtime:ro
+  links:
+    # Triggering downloads
+    - nzbget
+    # Sending notifications
+    - plex
+
+nzbget:
+  image: hamiltont/nzbget
+  ports:
+    - 6789:6789
+  volumes:
+    - /lxc/nzbget/data:/nzbget
+    - /media/seagate4:/media/seagate4
+    - /media/seagate5:/media/seagate5
+    - /etc/localtime:/etc/localtime:ro
+
+couchpotato:
+  image: hamiltont/couchpotato
+  ports:
+    - 5050:5050
+  volumes:
+    - /lxc/couchpotato:/couchdata
+    - /media/seagate4:/media/seagate4
+    - /media/seagate5:/media/seagate5
+    - /etc/localtime:/etc/localtime:ro
+  links:
+    # Download trigger
+    - nzbget
+    # Refresh notification
+    - plex
+
+plex:
+  image: hamiltont/plex
+  environment: 
+    - PLEX_HOSTNET=10.0.0.1/255.255.255.0
+  ports:
+    # See https://support.plex.tv/hc/en-us/articles/201543147
+    - 32400:32400
+    - "1900:1900/udp"
+    - 3005:3005
+    - "5353:5353/udp"
+    - 8324:8324
+    - "32410:32410/udp"
+    - "32412:32412/udp"
+    - "32413:32413/udp"
+    - "32414:32414/udp"
+    - 32469:32469
+  # net: "host"
+  volumes:
+    - /media/seagate4:/media/seagate4
+    - /media/seagate5:/media/seagate5
+    - /lxc/plex:/plex
+    - /etc/localtime:/etc/localtime:ro
